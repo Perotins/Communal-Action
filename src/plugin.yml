@@ -1,0 +1,9 @@
+name: CommunalAction
+version: 1.0
+author: Perotin
+main: me.perotin.communalaction.CommunalAction
+commands:
+   communalaction:
+      usage: /communalaction <player>
+      aliases: [ca, votep, votepunish]
+      permission: communalaction.use

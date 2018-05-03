@@ -1,0 +1,17 @@
+# Welcome to the messages file of Communal Action!
+# Every message in the plugin can be found here!
+#
+# Placeholder:
+# Only use placeholders that appear in the original message!
+
+mute-display: "&eMute &f$name$"
+
+kick-display: "&eKick &f$name$"
+
+jail-display: "&eJail &f$name$"
+
+rescind-display: "&eRescind vote"
+
+
+punish-online: "&cYou can only punish online players!"
+wrong-arguments: "&cWrong arguments! Type /votepunish <player>!"
