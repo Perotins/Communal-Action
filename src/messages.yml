@@ -15,3 +15,12 @@ rescind-display: "&eRescind vote"
 
 punish-online: "&cYou can only punish online players!"
 wrong-arguments: "&cWrong arguments! Type /votepunish <player>!"
+muted-player-broadcast: "&4[&c$player$&4]&c has been muted for 5 minutes!"
+jail-player-broadcast: "&4[&c$player$&4]&c has been jailed for 5 minutes!"
+kicked-player-broadcast: "&4[&c$player$&4]&c has been kicked!"
+
+
+confirminig-action: "&cWarning! You are about to vote to punish $player$! This should not be taken lightly, as you may be asked to provide proof and can be held accountable if you fail to do so!"
+confirming-action-2: "Type &e'$misc$'&c to cancel or click here to proceed."
+cancel: "cancel"
+player-only: "Only players can run this command!"

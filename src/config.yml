@@ -22,6 +22,10 @@ inventory-title: "Chose a punishment for $player$!"
 
 # Currently the plugin is very one-dimensional in that players can only jail, kick, and mute players. I will be expanding on this
 # To make it more dynamic over time. Also, the $player$ part is what gets replaced with the player's name.
+
+# NOTE! If you use percentages and generally have a low amount of players online, this could mean that one player could mute/jail/kick someone
+# All by themselves. I'd generally say to use plain numbers, but it is up to you.
+
 mute-vote: 5
    command: /mute $player$ 500
    broadcast: true

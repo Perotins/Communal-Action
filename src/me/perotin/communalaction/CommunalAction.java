@@ -1,6 +1,7 @@
 package me.perotin.communalaction;
 
 import me.perotin.communalaction.commands.CommunalActionCommand;
+import me.perotin.communalaction.events.RestrictPlayerEvent;
 import me.perotin.communalaction.files.CommunalFile;
 import me.perotin.communalaction.objects.CommunalVote;
 import org.bukkit.Bukkit;
@@ -23,6 +24,14 @@ public class CommunalAction extends JavaPlugin {
         Started by Perotin on April 29, 2018
      */
 
+    /*
+    TODO list
+    1. Refactor getVotees to getVoters
+    2. Cleanup mainclickevent logic and maybe try to generalize it
+    3. Implement rescind vote somehow
+    4. implement broadcast on config option when vote event takes place
+     */
+
     private HashSet<CommunalVote> onGoingVotes;
 
 
@@ -30,8 +39,9 @@ public class CommunalAction extends JavaPlugin {
     public void onEnable(){
         this.onGoingVotes = new HashSet<>();
         getCommand("communalaction").setExecutor(new CommunalActionCommand(this));
+        Bukkit.getPluginManager().registerEvents(new RestrictPlayerEvent(), this);
         saveDefaultConfig();
-        CommunalVote.initalizeConstants(this);
+        CommunalVote.initializeConstants(this);
     }
 
     public static Inventory getMainInventory(CommunalAction plugin, String name){

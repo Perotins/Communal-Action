@@ -2,6 +2,7 @@ package me.perotin.communalaction.objects;
 
 import me.perotin.communalaction.CommunalAction;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashSet;
@@ -17,21 +18,21 @@ public class CommunalVote {
     public static int JAILVOTECOUNT;
     public static int JAILVOTEPERCENTAGE;
 
-    private UUID playerVoted;
+    private OfflinePlayer playerVoted;
     private HashSet<UUID> votees;
     private CommunalVoteType type;
 
 
 
-    public CommunalVote(UUID playerVoted, UUID firstVote, CommunalVoteType voteType){
+    public CommunalVote(OfflinePlayer playerVoted, UUID firstVote, CommunalVoteType voteType){
         this.playerVoted = playerVoted;
         this.votees = new HashSet<>();
         votees.add(firstVote);
         this.type = voteType;
     }
 
-    public UUID getPlayerVoted() {
-        return playerVoted;
+    public OfflinePlayer getPlayerVoted() {
+        return this.playerVoted;
     }
 
     public static void initializeConstants(CommunalAction plugin){
@@ -114,7 +115,7 @@ public class CommunalVote {
 
 
     public enum CommunalVoteType {
-        MUTE, JAIL,
+        MUTE, JAIL, KICK
     }
 
 }
