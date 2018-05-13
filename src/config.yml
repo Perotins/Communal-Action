@@ -16,22 +16,39 @@ inventory-title: "Chose a punishment for $player$!"
 
 # So after reading the two choices above, how do you configure it to your liking?
 # If you want it to use percentages, you would do '50%'. Make sure to include the percentage sign!
-# If you want it to go by player count only, then just include the number i/e '5' players
+# If you want it to go by player count only, then just include the number i/e 5 players
 # The command portion is the command that you want Communal Action to run when voted
 # The broadcast option is if the plugin should broadcast to the entire server than <player> is being voted to be <muted/jailed/kicked>
+# The inventory title and inventory slot pertain to the main inventory
+# The name part is how the plugin recognizes this form of punishment, so leave it plain and simple without chatcolors etc
+# The material part also pertains to the inventory, to see all valid materials see this link https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 
-# Currently the plugin is very one-dimensional in that players can only jail, kick, and mute players. I will be expanding on this
-# To make it more dynamic over time. Also, the $player$ part is what gets replaced with the player's name.
 
 # NOTE! If you use percentages and generally have a low amount of players online, this could mean that one player could mute/jail/kick someone
 # All by themselves. I'd generally say to use plain numbers, but it is up to you.
 
 mute-vote: 5
-   command: /mute $player$ 500
+   command: /mute $player$ 300
    broadcast: true
+   broadcast-message: "&4[&c$player$&4]&c has been voted to be muted for 5 minutes!"
+   inventory-title: "&eMute &f$name$"
+   inventory-slot: 10
+   name: "mute"
+   material: "REDSTONE"
 kick-vote: 3
    command: /kick $player$
    broadcast: true
+   broadcast-message: "&4[&c$player$&4]&c has been voted to kicked!"
+   invetory-title: "&eKick &f$name$"
+   inventory-slot: 12
+   name: "kick"
+   material: "REDSTONE"
 jail-vote: 7
-   command: /jail $player$ 500
+   command: /jail $player$ 300
    broadcast: true
+   broadcast: "&4[&c$player$&4]&c has been voted to be jailed for 5 minutes!"
+   inventory-title: "&eKick &f$name$"
+   inventory-slot: 14
+   name: "jail"
+   material: "REDSTONE"
+

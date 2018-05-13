@@ -39,41 +39,46 @@ public class MainClickEvent {
                             String choice = currentItem.getItemMeta().getDisplayName();
                             String target = voting.get(clicker.getUniqueId());
                             CommunalVote existingVote = null;
+                            // pair up choice with internal workings
+                            String configKey = "";
+                            String type = "";
+                            for(String key : plugin.getConfig().getKeys(false)){
+                                if(choice.equals(plugin.getConfig().getString(key+".inventory-title")
+                                        .replace("$name$", target))){
+                                    configKey = key;
+                                    type = plugin.getConfig().getString(key+".name");
 
-
-                            if (choice.equals(messages.getString("mute-display"))) {
-                                // put a vote in for mute
-
-
-                                for (CommunalVote vote : plugin.getOnGoingVotes()) {
-                                    if (vote.getType() == CommunalVote.CommunalVoteType.MUTE
-                                            && vote.getPlayerVoted().getUniqueId().equals(Bukkit.getOfflinePlayer(target).getUniqueId())) {
-                                        existingVote = vote;
-                                    }
                                 }
-                                // if existing vote
+                            }
+                            for(CommunalVote vote : plugin.getOnGoingVotes()){
+                                if(vote.getPlayerVoted().getUniqueId().equals(Bukkit.getOfflinePlayer(target).getUniqueId())
+                                        && vote.getType().equals(type)){
+                                    existingVote = vote;
+                                }
+                            }
 
-                                if (existingVote != null) {
-                                    CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, existingVote);
+                            if(existingVote != null){
+                                // found an existing vote
+                                CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, existingVote);
                                     Bukkit.getPluginManager().callEvent(communalVoteEvent);
 
                                     if (!communalVoteEvent.isCancelled()) {
                                         //proceed with voting
                                         existingVote.addVote(clicker.getUniqueId());
-                                        if (CommunalVote.MUTEVOTEPERCENTAGE == -1) {
-                                            if (existingVote.getVotees().size() + 1 >= CommunalVote.MUTEVOTECOUNT) {
+                                        if (existingVote.getVoteCount() == null) {
+                                            if (existingVote.getVoters().size() + 1 >= existingVote.getVoteCount()) {
                                                 // MUTE THEM!
-                                                Bukkit.broadcastMessage(messages.getString("muted-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("mute-vote.command")
+                                                Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
+                                                .replace("$name$", target));
+                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
                                                         .replace("$player$", existingVote.getPlayerVoted().getName()));
                                                 plugin.getOnGoingVotes().remove(existingVote);
                                             }
                                         } else {
-                                            if (existingVote.getVotees().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (CommunalVote.MUTEVOTEPERCENTAGE / 100))) {
-                                                Bukkit.broadcastMessage(messages.getString("muted-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("mute-vote.command")
+                                            if (existingVote.getVoters().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (existingVote.getVotePercentageNeeded() / 100))) {
+                                                Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
+                                                        .replace("$name$", target));
+                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
                                                         .replace("$player$", existingVote.getPlayerVoted().getName()));
                                                 plugin.getOnGoingVotes().remove(existingVote);
                                             }
@@ -82,185 +87,59 @@ public class MainClickEvent {
 
                                     }
 
-                                } else {
-                                    CommunalVote vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), CommunalVote.CommunalVoteType.MUTE);
-                                    plugin.getOnGoingVotes().add(vote);
-                                    CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, vote);
-                                    Bukkit.getPluginManager().callEvent(communalVoteEvent);
+                            } else {
+                                CommunalVote vote = null;
+                                if(plugin.getConfig().get(configKey) instanceof Integer) {
+                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString(configKey+".name"), plugin.getConfig().getInt(configKey), null);
 
-                                    if (!communalVoteEvent.isCancelled()) {
-                                        //proceed with voting
-                                        if (CommunalVote.MUTEVOTEPERCENTAGE == -1) {
-                                            if (existingVote.getVotees().size() + 1 >= CommunalVote.MUTEVOTECOUNT) {
-                                                // MUTE THEM!
-                                                Bukkit.broadcastMessage(messages.getString("muted-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("mute-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        } else {
-                                            if (existingVote.getVotees().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (CommunalVote.MUTEVOTEPERCENTAGE / 100))) {
-                                                Bukkit.broadcastMessage(messages.getString("muted-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("mute-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        }
-
+                                } else if (plugin.getConfig().get(configKey) instanceof String){
+                                    String parse = plugin.getConfig().getString(configKey);
+                                    Integer percentage = 0;
+                                    try {
+                                        percentage = Integer.parseInt(parse.substring(0, 1));
+                                    } catch (NumberFormatException ex){
+                                        ex.printStackTrace();
                                     }
+                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString(configKey+".name"), null, percentage);
+
+
+                                }
+                                plugin.getOnGoingVotes().add(vote);
+                                CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, vote);
+                                Bukkit.getPluginManager().callEvent(communalVoteEvent);
+
+                                if (!communalVoteEvent.isCancelled()) {
+                                    //proceed with voting
+                                    if (existingVote.getVoteCount() == null) {
+                                        if (existingVote.getVoters().size() + 1 >= existingVote.getVoteCount()) {
+                                            // MUTE THEM!
+                                            Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
+                                                    .replace("$name$", target));
+                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
+                                                    .replace("$player$", existingVote.getPlayerVoted().getName()));
+                                            plugin.getOnGoingVotes().remove(existingVote);
+                                        }
+                                    } else {
+                                        if (existingVote.getVoters().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (existingVote.getVotePercentageNeeded() / 100))) {
+                                            Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
+                                                    .replace("$name$", target));
+                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
+                                                    .replace("$player$", existingVote.getPlayerVoted().getName()));
+                                            plugin.getOnGoingVotes().remove(existingVote);
+                                        }
+                                    }
+
+
                                 }
                             }
-                            else if (choice.equals(messages.getString("jail-display"))) {
-                                // put a vote in for mute
-
-
-                                for (CommunalVote vote : plugin.getOnGoingVotes()) {
-                                    if (vote.getType() == CommunalVote.CommunalVoteType.JAIL
-                                            && vote.getPlayerVoted().equals(Bukkit.getOfflinePlayer(target).getUniqueId())) {
-                                        existingVote = vote;
-                                    }
-                                }
-                                // if existing vote
-
-                                if (existingVote != null) {
-                                    CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, existingVote);
-                                    Bukkit.getPluginManager().callEvent(communalVoteEvent);
-
-                                    if (!communalVoteEvent.isCancelled()) {
-                                        //proceed with voting
-                                        existingVote.addVote(clicker.getUniqueId());
-                                        if (CommunalVote.JAILVOTEPERCENTAGE == -1) {
-                                            if (existingVote.getVotees().size() + 1 >= CommunalVote.JAILVOTECOUNT) {
-                                                // jail THEM!
-                                                Bukkit.broadcastMessage(messages.getString("jail-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("jail-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        } else {
-                                            if (existingVote.getVotees().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (CommunalVote.JAILVOTEPERCENTAGE / 100))) {
-                                                Bukkit.broadcastMessage(messages.getString("jail-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("jail-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        }
-
-
-                                    }
-
-                                } else {
-                                    CommunalVote vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), CommunalVote.CommunalVoteType.JAIL);
-                                    plugin.getOnGoingVotes().add(vote);
-                                    CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, vote);
-                                    Bukkit.getPluginManager().callEvent(communalVoteEvent);
-
-                                    if (!communalVoteEvent.isCancelled()) {
-                                        //proceed with voting
-                                        if (CommunalVote.JAILVOTEPERCENTAGE == -1) {
-                                            if (existingVote.getVotees().size() + 1 >= CommunalVote.JAILVOTECOUNT) {
-                                                // Jail THEM!
-                                                Bukkit.broadcastMessage(messages.getString("jail-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("jail-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        } else {
-                                            if (existingVote.getVotees().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (CommunalVote.JAILVOTEPERCENTAGE / 100))) {
-                                                Bukkit.broadcastMessage(messages.getString("jail-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("jail-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
-                            else if (choice.equals(messages.getString("kick-display"))) {
-                                // put a vote in for mute
-
-
-                                for (CommunalVote vote : plugin.getOnGoingVotes()) {
-                                    if (vote.getType() == CommunalVote.CommunalVoteType.KICK
-                                            && vote.getPlayerVoted().equals(Bukkit.getOfflinePlayer(target).getUniqueId())) {
-                                        existingVote = vote;
-                                    }
-                                }
-                                // if existing vote
-
-                                if (existingVote != null) {
-                                    CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, existingVote);
-                                    Bukkit.getPluginManager().callEvent(communalVoteEvent);
-
-                                    if (!communalVoteEvent.isCancelled()) {
-                                        //proceed with voting
-                                        existingVote.addVote(clicker.getUniqueId());
-                                        if (CommunalVote.KICKVOTEPERCENTAGE == -1) {
-                                            if (existingVote.getVotees().size() + 1 >= CommunalVote.KICKVOTECOUNT) {
-                                                // jail THEM!
-                                                Bukkit.broadcastMessage(messages.getString("kicked-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("kick-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        } else {
-                                            if (existingVote.getVotees().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (CommunalVote.KICKVOTEPERCENTAGE / 100))) {
-                                                Bukkit.broadcastMessage(messages.getString("kicked-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("kick-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        }
-
-
-                                    }
-
-                                } else {
-                                    CommunalVote vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), CommunalVote.CommunalVoteType.KICK);
-                                    plugin.getOnGoingVotes().add(vote);
-                                    CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, vote);
-                                    Bukkit.getPluginManager().callEvent(communalVoteEvent);
-
-                                    if (!communalVoteEvent.isCancelled()) {
-                                        //proceed with voting
-                                        if (CommunalVote.KICKVOTEPERCENTAGE == -1) {
-                                            if (existingVote.getVotees().size() + 1 >= CommunalVote.KICKVOTECOUNT) {
-                                                // Jail THEM!
-                                                Bukkit.broadcastMessage(messages.getString("kicked-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("KICK-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        } else {
-                                            if (existingVote.getVotees().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (CommunalVote.KICKVOTEPERCENTAGE / 100))) {
-                                                Bukkit.broadcastMessage(messages.getString("kicked-player-broadcast")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("kick-vote.command")
-                                                        .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                                plugin.getOnGoingVotes().remove(existingVote);
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
+                        }
                         }
                     }
                 }
             }
         }
 
-    }
+
     @EventHandler
     public void onClose(InventoryCloseEvent event){
 

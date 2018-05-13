@@ -7,6 +7,7 @@ import me.perotin.communalaction.objects.CommunalVote;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
+import java.util.List;
 
 public class CommunalAction extends JavaPlugin {
 
@@ -26,13 +28,13 @@ public class CommunalAction extends JavaPlugin {
 
     /*
     TODO list
-    1. Refactor getVotees to getVoters
-    2. Cleanup mainclickevent logic and maybe try to generalize it
-    3. Implement rescind vote somehow
-    4. implement broadcast on config option when vote event takes place
+    1. Implement rescind vote somehow
+    2. Cleanup rest of classes and maybe finish it?
      */
 
     private HashSet<CommunalVote> onGoingVotes;
+
+    public static List<String> voteTypes;
 
 
     @Override
@@ -41,11 +43,13 @@ public class CommunalAction extends JavaPlugin {
         getCommand("communalaction").setExecutor(new CommunalActionCommand(this));
         Bukkit.getPluginManager().registerEvents(new RestrictPlayerEvent(), this);
         saveDefaultConfig();
-        CommunalVote.initializeConstants(this);
+        for(String key : getConfig().getKeys(false)){
+            voteTypes.add(getConfig().getString(key+".name"));
+        }
     }
 
     public static Inventory getMainInventory(CommunalAction plugin, String name){
-        CommunalFile file = new CommunalFile(CommunalFile.FileType.MESSAGES, plugin);
+        FileConfiguration config = plugin.getConfig();
         Inventory inventory = Bukkit.createInventory(null, plugin.getConfig().getInt("inventory-size"), plugin.getConfig().getString("inventory-title")
                 .replace("$name$", name));
 
@@ -56,10 +60,12 @@ public class CommunalAction extends JavaPlugin {
         head.setItemMeta(skullMeta);
 
         inventory.setItem(4, head);
-        inventory.setItem(10, constructItem("mute-display", name, Material.REDSTONE_BLOCK));
-        inventory.setItem(12, constructItem("kick-display", name, Material.REDSTONE_BLOCK));
-        inventory.setItem(14, constructItem("jail-display", name, Material.REDSTONE_BLOCK));
-        inventory.setItem(16, constructItem("rescind-display", "", Material.EMERALD_BLOCK));
+
+        for(String key : plugin.getConfig().getKeys(false)){
+            inventory.setItem(config.getInt(key+".inventory-slot"), constructItem(config.getString(key+".inventory-title"), name, Material.valueOf(config.getString(key+".material"))));
+
+        }
+
 
 
 
@@ -72,12 +78,13 @@ public class CommunalAction extends JavaPlugin {
     public HashSet<CommunalVote> getOnGoingVotes() {
         return this.onGoingVotes;
     }
-    private static ItemStack constructItem(String path, String name, Material material){
-        CommunalFile file = new CommunalFile(CommunalFile.FileType.MESSAGES, (CommunalAction) Bukkit.getPluginManager().getPlugin("CommunalAction"));
+
+    private static ItemStack constructItem(String title, String name, Material material){
         ItemStack item = new ItemStack(material);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(file.getString(path, CommunalFile.Placeholder.NAME, name));
+        itemMeta.setDisplayName(title.replace("$name$", name));
         item.setItemMeta(itemMeta);
         return item;
     }
+
 }
