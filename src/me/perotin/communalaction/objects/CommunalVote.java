@@ -9,8 +9,8 @@ public class CommunalVote {
 
 
 
-    private Integer voteCount;
-    private Integer votePercentageNeeded;
+    private int voteCount;
+    private int votePercentageNeeded;
     private OfflinePlayer playerVoted;
     private HashSet<UUID> voters;
     private String type;
@@ -47,21 +47,16 @@ public class CommunalVote {
         return type;
     }
 
-    public Integer getVoteCount() {
+    public int getVoteCount() {
         return voteCount;
     }
 
-    public void setVoteCount(Integer voteCount) {
-        this.voteCount = voteCount;
-    }
 
-    public Integer getVotePercentageNeeded() {
+    public int getVotePercentageNeeded() {
         return votePercentageNeeded;
     }
 
-    public void setVotePercentageNeeded(Integer votePercentageNeeded) {
-        this.votePercentageNeeded = votePercentageNeeded;
-    }
+
 
 
 

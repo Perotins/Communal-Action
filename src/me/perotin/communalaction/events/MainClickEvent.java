@@ -4,8 +4,10 @@ import me.perotin.communalaction.CommunalAction;
 import me.perotin.communalaction.files.CommunalFile;
 import me.perotin.communalaction.objects.CommunalVote;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -14,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class MainClickEvent {
+public class MainClickEvent implements Listener {
 
     private CommunalAction plugin;
     public static HashMap<UUID, String> voting = new HashMap<>();
@@ -28,6 +30,7 @@ public class MainClickEvent {
         if (event.getWhoClicked() instanceof Player) {
             CommunalFile messages = new CommunalFile(CommunalFile.FileType.MESSAGES, plugin);
             Player clicker = (Player) event.getWhoClicked();
+            boolean broadcast = plugin.getConfig().getBoolean("broadcast-on-vote");
             if (voting.containsKey(clicker.getUniqueId())) {
                 Inventory clicked = event.getClickedInventory();
                 if (clicked.getName().equals(plugin.getConfig().getString("inventory-title").replace("$player$", voting.get(clicker.getUniqueId())))) {
@@ -42,11 +45,12 @@ public class MainClickEvent {
                             // pair up choice with internal workings
                             String configKey = "";
                             String type = "";
-                            for(String key : plugin.getConfig().getKeys(false)){
-                                if(choice.equals(plugin.getConfig().getString(key+".inventory-title")
-                                        .replace("$name$", target))){
-                                    configKey = key;
-                                    type = plugin.getConfig().getString(key+".name");
+                            for(String key : plugin.getConfig().getConfigurationSection("punishments").getKeys(false)){
+                                if(choice.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("punishments."+key+".inventory-title")
+                                        .replace("$name$", target)))){
+                                    //Bukkit.broadcastMessage(key);
+                                    configKey += key;
+                                    type = plugin.getConfig().getString("punishments."+key+".name");
 
                                 }
                             }
@@ -58,6 +62,12 @@ public class MainClickEvent {
                             }
 
                             if(existingVote != null){
+                                if(existingVote.getVoters().stream().anyMatch(uuid -> uuid.equals(clicker.getUniqueId()))){
+                                    // already vote
+                                    clicker.closeInventory();
+                                    clicker.sendMessage(messages.getString("already-voted"));
+                                    return;
+                                }
                                 // found an existing vote
                                 CommunalVoteEvent communalVoteEvent = new CommunalVoteEvent(clicker, existingVote);
                                     Bukkit.getPluginManager().callEvent(communalVoteEvent);
@@ -65,22 +75,39 @@ public class MainClickEvent {
                                     if (!communalVoteEvent.isCancelled()) {
                                         //proceed with voting
                                         existingVote.addVote(clicker.getUniqueId());
-                                        if (existingVote.getVoteCount() == null) {
+                                        clicker.closeInventory();
+                                        if (existingVote.getVoteCount() != -1) {
                                             if (existingVote.getVoters().size() + 1 >= existingVote.getVoteCount()) {
                                                 // MUTE THEM!
-                                                Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
+                                                Bukkit.broadcastMessage(plugin.getConfig().getString("punishments."+configKey+".broadcast-message")
                                                 .replace("$name$", target));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
+                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("punshments."+configKey+".command")
                                                         .replace("$player$", existingVote.getPlayerVoted().getName()));
                                                 plugin.getOnGoingVotes().remove(existingVote);
+                                            } else {
+                                                clicker.sendMessage(messages.getString("voted").replace("$player$", target));
+                                                if(broadcast) {
+                                                    Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("broadcast-message")
+                                                            .replace("$player$", target)
+                                                            .replace("$number$", existingVote.getVoters().size()+1+"")
+                                                            .replace("$type$", type)));
+                                                }
                                             }
                                         } else {
                                             if (existingVote.getVoters().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (existingVote.getVotePercentageNeeded() / 100))) {
-                                                Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
+                                                Bukkit.broadcastMessage(plugin.getConfig().getString("punishments."+configKey+".broadcast-message")
                                                         .replace("$name$", target));
-                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
+                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("punishments."+configKey+".command")
                                                         .replace("$player$", existingVote.getPlayerVoted().getName()));
                                                 plugin.getOnGoingVotes().remove(existingVote);
+                                            } else {
+                                                clicker.sendMessage(messages.getString("voted").replace("$player$", target));
+                                                if(broadcast) {
+                                                    Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("broadcast-message")
+                                                            .replace("$player$", target)
+                                                            .replace("$number$", existingVote.getVoters().size()+1+"")
+                                                            .replace("$type$", type)));
+                                                }
                                             }
                                         }
 
@@ -89,18 +116,19 @@ public class MainClickEvent {
 
                             } else {
                                 CommunalVote vote = null;
-                                if(plugin.getConfig().get(configKey) instanceof Integer) {
-                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString(configKey+".name"), plugin.getConfig().getInt(configKey), null);
+                                if(plugin.getConfig().get("punishments."+configKey+".vote") instanceof Integer) {
+                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString("punishments."+configKey+".name"), plugin.getConfig().getInt("punishments."+configKey+".vote"), -1);
 
-                                } else if (plugin.getConfig().get(configKey) instanceof String){
-                                    String parse = plugin.getConfig().getString(configKey);
+                                } else if (plugin.getConfig().get("punishments."+configKey+".vote") instanceof String){
+                                    String parse = plugin.getConfig().getString("punishments."+configKey);
                                     Integer percentage = 0;
                                     try {
                                         percentage = Integer.parseInt(parse.substring(0, 1));
                                     } catch (NumberFormatException ex){
                                         ex.printStackTrace();
                                     }
-                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString(configKey+".name"), null, percentage);
+                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString("punishments."+configKey+".name"), -1, percentage);
+
 
 
                                 }
@@ -110,22 +138,41 @@ public class MainClickEvent {
 
                                 if (!communalVoteEvent.isCancelled()) {
                                     //proceed with voting
-                                    if (existingVote.getVoteCount() == null) {
-                                        if (existingVote.getVoters().size() + 1 >= existingVote.getVoteCount()) {
+                                    clicker.closeInventory();
+                                    if (vote.getVoteCount() != -1) {
+                                        if (vote.getVoters().size() + 1 >= vote.getVoteCount()) {
                                             // MUTE THEM!
-                                            Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
-                                                    .replace("$name$", target));
-                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
-                                                    .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                            plugin.getOnGoingVotes().remove(existingVote);
+                                            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("punishments."+configKey+".broadcast-message")
+                                                    .replace("$player$", target)));
+                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("punishments."+configKey+".command")
+                                                    .replace("$player$", vote.getPlayerVoted().getName()));
+                                            plugin.getOnGoingVotes().remove(vote);
+                                        } else {
+                                            clicker.sendMessage(messages.getString("voted").replace("$player$", target));
+                                            if(broadcast) {
+                                                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("broadcast-message")
+                                                        .replace("$player$", target)
+                                                        .replace("$number$", 1+"")
+                                                        .replace("$type$", type)));
+                                            }
+
+
                                         }
                                     } else {
-                                        if (existingVote.getVoters().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (existingVote.getVotePercentageNeeded() / 100))) {
-                                            Bukkit.broadcastMessage(plugin.getConfig().getString(configKey+".broadcast-message")
-                                                    .replace("$name$", target));
-                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString(configKey+".command")
-                                                    .replace("$player$", existingVote.getPlayerVoted().getName()));
-                                            plugin.getOnGoingVotes().remove(existingVote);
+                                        if (vote.getVoters().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (vote.getVotePercentageNeeded() / 100))) {
+                                            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("punishments."+configKey+".broadcast-message")
+                                                    .replace("$player$", target)));
+                                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfig().getString("punishments."+configKey+".command")
+                                                    .replace("$player$", vote.getPlayerVoted().getName()));
+                                            plugin.getOnGoingVotes().remove(vote);
+                                        } else {
+                                            clicker.sendMessage(messages.getString("voted").replace("$player$", target));
+                                            if(broadcast) {
+                                                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("broadcast-message")
+                                                        .replace("$player$", target)
+                                                        .replace("$number$", 1+"")
+                                                        .replace("$type$", type)));
+                                            }
                                         }
                                     }
 

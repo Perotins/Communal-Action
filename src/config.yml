@@ -8,6 +8,14 @@ inventory-size: 27
 # name of the inventory
 inventory-title: "Chose a punishment for $player$!"
 
+# Should we broadcast whenever a player has been voted to be punished? Note, this can lead to people "bandwagoning" and voting for the fun of it.
+# All votes are logged and I encourage you to track down people who vote without evidence and punish them yourselves.
+broadcast-on-vote: false
+
+# If you set the above message to true, then this is the message sent whenever a vote is casted.
+# If you have the above set to false, then skip over this.
+broadcast-message: "&e$player$ &chas $number$ vote to be $type$!"
+
 
 # WARNING: This is where the core configurations of Communal Action come into play! Bear with me here.
 # There are a few ways for Communal Action to decide when a vote should end
@@ -15,40 +23,44 @@ inventory-title: "Chose a punishment for $player$!"
 # The second is that a % of the online players have voted (i/e 50% of the server voted)
 
 # So after reading the two choices above, how do you configure it to your liking?
-# If you want it to use percentages, you would do '50%'. Make sure to include the percentage sign!
+# If you want it to use percentages, you would do "50%". Make sure to include the percentage sign!
 # If you want it to go by player count only, then just include the number i/e 5 players
 # The command portion is the command that you want Communal Action to run when voted
 # The broadcast option is if the plugin should broadcast to the entire server than <player> is being voted to be <muted/jailed/kicked>
 # The inventory title and inventory slot pertain to the main inventory
 # The name part is how the plugin recognizes this form of punishment, so leave it plain and simple without chatcolors etc
+# The name section is put in the $type$ in the broadcast-message string above.
 # The material part also pertains to the inventory, to see all valid materials see this link https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 
 
 # NOTE! If you use percentages and generally have a low amount of players online, this could mean that one player could mute/jail/kick someone
 # All by themselves. I'd generally say to use plain numbers, but it is up to you.
-
-mute-vote: 5
-   command: /mute $player$ 300
-   broadcast: true
-   broadcast-message: "&4[&c$player$&4]&c has been voted to be muted for 5 minutes!"
-   inventory-title: "&eMute &f$name$"
-   inventory-slot: 10
-   name: "mute"
-   material: "REDSTONE"
-kick-vote: 3
-   command: /kick $player$
-   broadcast: true
-   broadcast-message: "&4[&c$player$&4]&c has been voted to kicked!"
-   invetory-title: "&eKick &f$name$"
-   inventory-slot: 12
-   name: "kick"
-   material: "REDSTONE"
-jail-vote: 7
-   command: /jail $player$ 300
-   broadcast: true
-   broadcast: "&4[&c$player$&4]&c has been voted to be jailed for 5 minutes!"
-   inventory-title: "&eKick &f$name$"
-   inventory-slot: 14
-   name: "jail"
-   material: "REDSTONE"
+punishments:
+   mute:
+      vote: 5
+      command: "mute $player$ 300"
+      broadcast: true
+      broadcast-message: "&4[&c$player$&4]&c has been voted to be muted for 5 minutes!"
+      inventory-title: "&eMute &f$name$"
+      inventory-slot: 10
+      name: "muted"
+      material: "REDSTONE_BLOCK"
+   kick:
+      vote: 3
+      command: "kick $player$"
+      broadcast: true
+      broadcast-message: "&4[&c$player$&4]&c has been voted to be kicked!"
+      inventory-title: "&eKick &f$name$"
+      inventory-slot: 12
+      name: "kicked"
+      material: "REDSTONE_BLOCK"
+   jail:
+      vote: 7
+      command: "jail $player$ 300"
+      broadcast: true
+      broadcast: "&4[&c$player$&4]&c has been voted to be jailed for 5 minutes!"
+      inventory-title: "&eJail &f$name$"
+      inventory-slot: 14
+      name: "jailed"
+      material: "REDSTONE_BLOCK"
 

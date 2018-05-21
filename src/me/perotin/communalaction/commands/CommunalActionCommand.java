@@ -40,13 +40,13 @@ public class CommunalActionCommand implements CommandExecutor{
                         //online
                         if (players.contains(sender.getUniqueId())) {
 
-                            sender.openInventory(CommunalAction.getMainInventory(plugin, target));
+                            sender.openInventory(plugin.getMainInventory(target));
                             MainClickEvent.voting.put(sender.getUniqueId(), target);
                             players.remove(sender.getUniqueId());
                         } else {
                                 // send message confirming it
 
-                            IntStream.range(0, 10).forEach(i -> sender.sendMessage(" "));
+                            IntStream.range(0, 20).forEach(i -> sender.sendMessage(" "));
 
                                 sender.sendMessage(messages.getString("confirming-action")
                                         .replace("$player$", args[0]));
