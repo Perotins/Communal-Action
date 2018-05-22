@@ -1,9 +1,12 @@
 package me.perotin.communalaction.objects;
 
+import me.perotin.communalaction.CommunalAction;
+import me.perotin.communalaction.files.CommunalFile;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
-import java.util.HashSet;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class CommunalVote {
 
@@ -14,11 +17,12 @@ public class CommunalVote {
     private OfflinePlayer playerVoted;
     private HashSet<UUID> voters;
     private String type;
+    private String date;
 
 
 
 
-    public CommunalVote(OfflinePlayer playerVoted, UUID firstVote, String voteType, Integer voteCount, Integer votePercentageNeeded){
+    public CommunalVote(OfflinePlayer playerVoted, UUID firstVote, String voteType, Integer voteCount, Integer votePercentageNeeded, CommunalAction plugin){
         this.playerVoted = playerVoted;
         this.voters = new HashSet<>();
         voters.add(firstVote);
@@ -26,6 +30,16 @@ public class CommunalVote {
 
         this.voteCount = voteCount;
         this.votePercentageNeeded = votePercentageNeeded;
+        CommunalFile log = new CommunalFile(CommunalFile.FileType.LOG, plugin);
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+        this.date = format.format(date);
+
+
+        List<String> voters = new ArrayList<>();
+        voters.add(firstVote.toString());
+        log.getConfig().set(voteType+"."+playerVoted.getName()+"."+format.format(date)+".voters", voters);
+        log.save();
 
     }
 
@@ -54,6 +68,10 @@ public class CommunalVote {
 
     public int getVotePercentageNeeded() {
         return votePercentageNeeded;
+    }
+
+    public String getDate(){
+        return this.date;
     }
 
 

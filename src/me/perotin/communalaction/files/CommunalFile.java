@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 
 public class CommunalFile {
 
@@ -15,6 +16,9 @@ public class CommunalFile {
     public CommunalFile(FileType type, CommunalAction plugin){
         if(type == FileType.MESSAGES){
             file = new File(plugin.getDataFolder(), "messages.yml");
+            config = YamlConfiguration.loadConfiguration(file);
+        } else if(type == FileType.LOG) {
+            file = new File(plugin.getDataFolder(), "logs.yml");
             config = YamlConfiguration.loadConfiguration(file);
         }
     }
@@ -37,6 +41,18 @@ public class CommunalFile {
         return ChatColor.translateAlternateColorCodes('&', raw);
     }
 
+    public void set(String path, Object seriazable){
+        config.set(path, seriazable);
+    }
+
+    public void save(){
+        try {
+            this.config.save(file);
+        } catch (IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
     public String getString(String path){
         return ChatColor.translateAlternateColorCodes('&', config.getString(path));
     }
@@ -46,6 +62,6 @@ public class CommunalFile {
     }
 
     public enum FileType {
-        MESSAGES,
+        MESSAGES, LOG
     }
 }

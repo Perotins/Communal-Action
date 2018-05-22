@@ -13,8 +13,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainClickEvent implements Listener {
 
@@ -45,6 +46,10 @@ public class MainClickEvent implements Listener {
                             // pair up choice with internal workings
                             String configKey = "";
                             String type = "";
+                            CommunalFile log = new CommunalFile(CommunalFile.FileType.LOG, plugin);
+
+                            Date date = new Date();
+                            SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
                             for(String key : plugin.getConfig().getConfigurationSection("punishments").getKeys(false)){
                                 if(choice.equals(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("punishments."+key+".inventory-title")
                                         .replace("$name$", target)))){
@@ -75,6 +80,10 @@ public class MainClickEvent implements Listener {
                                     if (!communalVoteEvent.isCancelled()) {
                                         //proceed with voting
                                         existingVote.addVote(clicker.getUniqueId());
+                                        List<String> voters = existingVote.getVoters().stream().map(UUID::toString)
+                                                .collect(Collectors.toList());
+                                        log.set(type+"."+target+"."+existingVote.getDate()+".voters", voters);
+                                        log.save();
                                         clicker.closeInventory();
                                         if (existingVote.getVoteCount() != -1) {
                                             if (existingVote.getVoters().size() + 1 >= existingVote.getVoteCount()) {
@@ -89,7 +98,7 @@ public class MainClickEvent implements Listener {
                                                 if(broadcast) {
                                                     Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("broadcast-message")
                                                             .replace("$player$", target)
-                                                            .replace("$number$", existingVote.getVoters().size()+1+"")
+                                                            .replace("$number$", existingVote.getVoters().size()+"")
                                                             .replace("$type$", type)));
                                                 }
                                             }
@@ -105,7 +114,7 @@ public class MainClickEvent implements Listener {
                                                 if(broadcast) {
                                                     Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("broadcast-message")
                                                             .replace("$player$", target)
-                                                            .replace("$number$", existingVote.getVoters().size()+1+"")
+                                                            .replace("$number$", existingVote.getVoters().size()+"")
                                                             .replace("$type$", type)));
                                                 }
                                             }
@@ -117,7 +126,7 @@ public class MainClickEvent implements Listener {
                             } else {
                                 CommunalVote vote = null;
                                 if(plugin.getConfig().get("punishments."+configKey+".vote") instanceof Integer) {
-                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString("punishments."+configKey+".name"), plugin.getConfig().getInt("punishments."+configKey+".vote"), -1);
+                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString("punishments."+configKey+".name"), plugin.getConfig().getInt("punishments."+configKey+".vote"), -1, plugin);
 
                                 } else if (plugin.getConfig().get("punishments."+configKey+".vote") instanceof String){
                                     String parse = plugin.getConfig().getString("punishments."+configKey);
@@ -127,7 +136,7 @@ public class MainClickEvent implements Listener {
                                     } catch (NumberFormatException ex){
                                         ex.printStackTrace();
                                     }
-                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString("punishments."+configKey+".name"), -1, percentage);
+                                    vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString("punishments."+configKey+".name"), -1, percentage, plugin);
 
 
 

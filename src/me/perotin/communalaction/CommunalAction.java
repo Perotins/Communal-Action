@@ -47,6 +47,9 @@ public class CommunalAction extends JavaPlugin {
         if (!new File(getDataFolder(), "messages.yml").exists()) {
             saveResource("messages.yml", false);
         }
+        if (!new File(getDataFolder(), "logs.yml").exists()) {
+            saveResource("logs.yml", false);
+        }
 
         Bukkit.getPluginManager().registerEvents(new MainClickEvent(this), this);
         Bukkit.getPluginManager().registerEvents(new RestrictPlayerEvent(), this);
@@ -54,6 +57,7 @@ public class CommunalAction extends JavaPlugin {
         for(String key : getConfig().getConfigurationSection("punishments").getKeys(false)){
             voteTypes.add(getConfig().getString("punishments."+key+".name"));
         }
+        //getConfig().getConfigurationSection("punishmnents").getKeys(false).forEach(key -> voteTypes.add(getConfig().getString("punishments."+key+".name")));
 
 
     }
