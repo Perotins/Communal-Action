@@ -2,6 +2,9 @@
 # If you need any assistance, I am very reachable over Spigot!
 
 
+# Should Communal Action allow players to punish themselves?
+punish-self: false
+
 # must be a multiple of 9, size of the inventory shown when doing /ca
 inventory-size: 27
 
@@ -58,7 +61,7 @@ punishments:
       vote: 7
       command: "jail $player$ 300"
       broadcast: true
-      broadcast: "&4[&c$player$&4]&c has been voted to be jailed for 5 minutes!"
+      broadcast-message: "&4[&c$player$&4]&c has been voted to be jailed for 5 minutes!"
       inventory-title: "&eJail &f$name$"
       inventory-slot: 14
       name: "jailed"

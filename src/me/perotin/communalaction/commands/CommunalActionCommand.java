@@ -35,7 +35,15 @@ public class CommunalActionCommand implements CommandExecutor{
                 sender.sendMessage(messages.getString("wrong-arguments"));
                 return true;
             } else {
+                if(sender.hasPermission("communalaction.admin")) {
+                    if (args[0].equalsIgnoreCase("reload")) {
+                        plugin.reloadConfig();
+                        sender.sendMessage(messages.getString("reloaded-config"));
+                        return true;
+                    }
+                }
                     String target = args[0];
+
                     if (Bukkit.getPlayer(target) != null) {
                         //online
                         if (players.contains(sender.getUniqueId())) {
@@ -45,6 +53,11 @@ public class CommunalActionCommand implements CommandExecutor{
                             players.remove(sender.getUniqueId());
                         } else {
                                 // send message confirming it
+                            if(!plugin.getConfig().getBoolean("punish-self")){
+                                sender.closeInventory();
+                                sender.sendMessage(messages.getString("cannot-punish-self"));
+                                return true;
+                            }
 
                             IntStream.range(0, 20).forEach(i -> sender.sendMessage(" "));
 
