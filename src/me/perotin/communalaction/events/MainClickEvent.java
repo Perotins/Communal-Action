@@ -34,7 +34,7 @@ public class MainClickEvent implements Listener {
             boolean broadcast = plugin.getConfig().getBoolean("broadcast-on-vote");
             if (voting.containsKey(clicker.getUniqueId())) {
                 Inventory clicked = event.getClickedInventory();
-                if (clicked.getName().equals(plugin.getConfig().getString("inventory-title").replace("$player$", voting.get(clicker.getUniqueId())))) {
+                if (event.getView().getTitle().equals(plugin.getConfig().getString("inventory-title").replace("$player$", voting.get(clicker.getUniqueId())))) {
                     // voting
                     event.setCancelled(true);
                     ItemStack currentItem = event.getCurrentItem();

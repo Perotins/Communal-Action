@@ -2,6 +2,7 @@ name: CommunalAction
 version: 1.0.1
 author: Perotin
 main: me.perotin.communalaction.CommunalAction
+api-version: 1.13
 commands:
    communalaction:
       usage: /communalaction <player>

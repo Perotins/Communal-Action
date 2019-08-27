@@ -38,6 +38,7 @@ broadcast-message: "&e$player$ &chas $number$ vote to be $type$!"
 
 # NOTE! If you use percentages and generally have a low amount of players online, this could mean that one player could mute/jail/kick someone
 # All by themselves. I'd generally say to use plain numbers, but it is up to you.
+
 punishments:
    mute:
       vote: 5
@@ -45,7 +46,7 @@ punishments:
       broadcast: true
       broadcast-message: "&4[&c$player$&4]&c has been voted to be muted for 5 minutes!"
       inventory-title: "&eMute &f$name$"
-      inventory-slot: 10
+      inventory-slot: 11
       name: "muted"
       material: "REDSTONE_BLOCK"
    kick:
@@ -54,7 +55,7 @@ punishments:
       broadcast: true
       broadcast-message: "&4[&c$player$&4]&c has been voted to be kicked!"
       inventory-title: "&eKick &f$name$"
-      inventory-slot: 12
+      inventory-slot: 13
       name: "kicked"
       material: "REDSTONE_BLOCK"
    jail:
@@ -63,7 +64,7 @@ punishments:
       broadcast: true
       broadcast-message: "&4[&c$player$&4]&c has been voted to be jailed for 5 minutes!"
       inventory-title: "&eJail &f$name$"
-      inventory-slot: 14
+      inventory-slot: 15
       name: "jailed"
       material: "REDSTONE_BLOCK"
 

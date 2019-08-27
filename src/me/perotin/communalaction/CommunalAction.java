@@ -4,6 +4,7 @@ import me.perotin.communalaction.commands.CommunalActionCommand;
 import me.perotin.communalaction.events.MainClickEvent;
 import me.perotin.communalaction.events.RestrictPlayerEvent;
 import me.perotin.communalaction.objects.CommunalVote;
+import me.perotin.communalaction.utils.MetricsLite;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -42,6 +43,7 @@ public class CommunalAction extends JavaPlugin {
     public void onEnable(){
         saveDefaultConfig();
 
+        MetricsLite lite = new MetricsLite(this);
         this.onGoingVotes = new HashSet<>();
         voteTypes = new ArrayList<>();
         if (!new File(getDataFolder(), "messages.yml").exists()) {
@@ -69,7 +71,7 @@ public class CommunalAction extends JavaPlugin {
 
 
 
-                ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
         skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(name));
         skullMeta.setDisplayName(ChatColor.GREEN + name);
