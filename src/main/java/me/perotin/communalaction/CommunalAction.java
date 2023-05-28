@@ -54,7 +54,7 @@ public class CommunalAction extends JavaPlugin {
         }
 
         Bukkit.getPluginManager().registerEvents(new MainClickEvent(this), this);
-        Bukkit.getPluginManager().registerEvents(new RestrictPlayerEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new RestrictPlayerEvent(this), this);
         getCommand("communalaction").setExecutor(new CommunalActionCommand(this));
         for(String key : getConfig().getConfigurationSection("punishments").getKeys(false)){
             voteTypes.add(getConfig().getString("punishments."+key+".name"));

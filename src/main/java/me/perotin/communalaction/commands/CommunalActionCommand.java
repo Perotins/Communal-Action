@@ -43,21 +43,23 @@ public class CommunalActionCommand implements CommandExecutor{
                     }
                 }
                     String target = args[0];
+                    if (target.equalsIgnoreCase(sender.getName())
+                    && !plugin.getConfig().getBoolean("punish-self")){
+                        sender.sendMessage(messages.getString("cannot-punish-self"));
+                        return true;
+                    }
 
                     if (Bukkit.getPlayer(target) != null) {
                         //online
+
                         if (players.contains(sender.getUniqueId())) {
 
                             sender.openInventory(plugin.getMainInventory(target));
                             MainClickEvent.voting.put(sender.getUniqueId(), target);
+                            Bukkit.getLogger().info("Removed player from hashset!");
                             players.remove(sender.getUniqueId());
                         } else {
-                                // send message confirming it
-                            if(!plugin.getConfig().getBoolean("punish-self")){
-                                sender.closeInventory();
-                                sender.sendMessage(messages.getString("cannot-punish-self"));
-                                return true;
-                            }
+
 
                             IntStream.range(0, 20).forEach(i -> sender.sendMessage(" "));
 

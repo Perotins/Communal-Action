@@ -6,7 +6,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class CommunalVoteEvent extends Event implements Cancellable{
+public class CommunalVoteEvent extends Event implements Cancellable {
 
     private Player voter;
     private CommunalVote vote;
