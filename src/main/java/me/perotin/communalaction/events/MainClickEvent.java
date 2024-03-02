@@ -124,11 +124,14 @@ public class MainClickEvent implements Listener {
                                     }
 
                             } else {
+                                // New vote
                                 CommunalVote vote = null;
                                 if(plugin.getConfig().get("punishments."+configKey+".vote") instanceof Integer) {
+                                    // Raw count vote
                                     vote = new CommunalVote(Bukkit.getOfflinePlayer(voting.get(clicker.getUniqueId())), clicker.getUniqueId(), plugin.getConfig().getString("punishments."+configKey+".name"), plugin.getConfig().getInt("punishments."+configKey+".vote"), -1, plugin);
 
                                 } else if (plugin.getConfig().get("punishments."+configKey+".vote") instanceof String){
+                                    // Percentage
                                     String parse = plugin.getConfig().getString("punishments."+configKey);
                                     Integer percentage = 0;
                                     try {
@@ -168,6 +171,7 @@ public class MainClickEvent implements Listener {
 
                                         }
                                     } else {
+
                                         if (vote.getVoters().size() + 1 >= ((Bukkit.getOnlinePlayers().size() + 1) * (vote.getVotePercentageNeeded() / 100))) {
                                             Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("punishments."+configKey+".broadcast-message")
                                                     .replace("$player$", target)));

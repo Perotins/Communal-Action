@@ -2,12 +2,14 @@ package me.perotin.communalaction;
 
 import me.perotin.communalaction.commands.CommunalActionCommand;
 import me.perotin.communalaction.events.MainClickEvent;
+import me.perotin.communalaction.events.MainClickEvent2;
 import me.perotin.communalaction.events.RestrictPlayerEvent;
 import me.perotin.communalaction.objects.CommunalVote;
 import me.perotin.communalaction.utils.MetricsLite;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,6 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class CommunalAction extends JavaPlugin {
 
@@ -53,7 +56,9 @@ public class CommunalAction extends JavaPlugin {
             saveResource("logs.yml", false);
         }
 
-        Bukkit.getPluginManager().registerEvents(new MainClickEvent(this), this);
+        //Bukkit.getPluginManager().registerEvents(new MainClickEvent(this), this);
+        Bukkit.getPluginManager().registerEvents(new MainClickEvent2(this), this);
+
         Bukkit.getPluginManager().registerEvents(new RestrictPlayerEvent(this), this);
         getCommand("communalaction").setExecutor(new CommunalActionCommand(this));
         for(String key : getConfig().getConfigurationSection("punishments").getKeys(false)){
@@ -108,5 +113,41 @@ public class CommunalAction extends JavaPlugin {
         item.setItemMeta(itemMeta);
         return item;
     }
+
+    public CommunalVote createVote(String targetName, String configKey, UUID firstVoterUuid) {
+        // Assuming targetName is the name of the player being voted on,
+        // configKey is the part of the configuration that specifies the punishment details,
+        // and firstVoterUuid is the UUID of the player who initiated the vote.
+
+        OfflinePlayer playerVoted = Bukkit.getOfflinePlayer(targetName);
+        String voteType = getConfig().getString("punishments." + configKey + ".name");
+
+        Object voteSetting = getConfig().get("punishments." + configKey + ".vote");
+        Integer voteCount = null;
+        Integer votePercentageNeeded = null;
+
+        // Determine if the vote setting is a raw count or a percentage
+        if (voteSetting instanceof Integer) {
+            voteCount = (Integer) voteSetting; // Use this value directly for voteCount
+            votePercentageNeeded = -1; // Indicate that percentage-based voting is not used
+        } else if (voteSetting instanceof String && ((String) voteSetting).endsWith("%")) {
+            try {
+                // Extract the integer value before the "%" character
+                votePercentageNeeded = Integer.parseInt(((String) voteSetting).replace("%", ""));
+                voteCount = -1; // Indicate that raw count voting is not used
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return null; // Configuration error
+            }
+        } else {
+            // Configuration is not correctly set or missing
+            return null;
+        }
+
+        // Create the CommunalVote object with the determined settings
+        return new CommunalVote(playerVoted, firstVoterUuid, voteType, voteCount, votePercentageNeeded, this);
+    }
+
+
 
 }

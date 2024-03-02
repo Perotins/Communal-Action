@@ -2,6 +2,7 @@ package me.perotin.communalaction.commands;
 
 import me.perotin.communalaction.CommunalAction;
 import me.perotin.communalaction.events.MainClickEvent;
+import me.perotin.communalaction.events.MainClickEvent2;
 import me.perotin.communalaction.files.CommunalFile;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -55,7 +56,7 @@ public class CommunalActionCommand implements CommandExecutor{
                         if (players.contains(sender.getUniqueId())) {
 
                             sender.openInventory(plugin.getMainInventory(target));
-                            MainClickEvent.voting.put(sender.getUniqueId(), target);
+                            MainClickEvent2.voting.put(sender.getUniqueId(), target);
                             Bukkit.getLogger().info("Removed player from hashset!");
                             players.remove(sender.getUniqueId());
                         } else {

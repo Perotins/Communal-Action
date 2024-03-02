@@ -23,6 +23,11 @@ public class CommunalVote {
 
 
     public CommunalVote(OfflinePlayer playerVoted, UUID firstVote, String voteType, Integer voteCount, Integer votePercentageNeeded, CommunalAction plugin){
+        // playerVoted is the player being voted to be punished
+        // firstVote is the player who first voted for this player to be punished
+        // voteType is the .name value from the config (muted, kicked, jailed)
+        // voteCount is the raw number threshold for a punishment to be executed, -1 if not used
+        // votePercentage is the percantage of online players that must vote for the punishment to be executed
         this.playerVoted = playerVoted;
         this.voters = new HashSet<>();
         voters.add(firstVote);
@@ -49,6 +54,10 @@ public class CommunalVote {
 
 
 
+    public boolean hasVoted(UUID uuid) {
+        return getVoters().contains(uuid);
+    }
+
     public HashSet<UUID> getVoters() {
         return voters;
     }
@@ -74,6 +83,31 @@ public class CommunalVote {
         return this.date;
     }
 
+
+    public boolean reachedThreshold() {
+       if (voteCount != -1) {
+           return getVoters().size() >= voteCount;
+       } else {
+           return getVoters().size() >= (getVotePercentageNeeded() / 100) * Bukkit.getOnlinePlayers().size();
+       }
+    }
+
+
+    /**
+     * Attempts to add a voter's UUID to the set of voters.
+     *
+     * @param voterUuid The UUID of the voter to add.
+     * @return true if the voter was successfully added (i.e., had not already voted), false otherwise.
+     */
+    public boolean addVoter(UUID voterUuid) {
+        return voters.add(voterUuid);
+    }
+
+
+    public boolean isForTargetAndChoice(String targetName, String choice) {
+        // Check if the player being voted on matches the targetName and if the vote type matches the choice
+        return this.playerVoted.getName().equalsIgnoreCase(targetName) && this.getType().equalsIgnoreCase(choice);
+    }
 
 
 
