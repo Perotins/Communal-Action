@@ -28,9 +28,12 @@ public class MainClickEvent implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
+
         if (event.getWhoClicked() instanceof Player) {
             CommunalFile messages = new CommunalFile(CommunalFile.FileType.MESSAGES, plugin);
             Player clicker = (Player) event.getWhoClicked();
+
+
             boolean broadcast = plugin.getConfig().getBoolean("broadcast-on-vote");
             if (voting.containsKey(clicker.getUniqueId())) {
                 Inventory clicked = event.getClickedInventory();

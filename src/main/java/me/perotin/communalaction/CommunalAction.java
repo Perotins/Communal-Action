@@ -2,7 +2,6 @@ package me.perotin.communalaction;
 
 import me.perotin.communalaction.commands.CommunalActionCommand;
 import me.perotin.communalaction.events.MainClickEvent;
-import me.perotin.communalaction.events.MainClickEvent2;
 import me.perotin.communalaction.events.RestrictPlayerEvent;
 import me.perotin.communalaction.objects.CommunalVote;
 import me.perotin.communalaction.utils.MetricsLite;
@@ -56,10 +55,12 @@ public class CommunalAction extends JavaPlugin {
             saveResource("logs.yml", false);
         }
 
-        //Bukkit.getPluginManager().registerEvents(new MainClickEvent(this), this);
-        Bukkit.getPluginManager().registerEvents(new MainClickEvent2(this), this);
+        Bukkit.getPluginManager().registerEvents(new MainClickEvent(this), this);
 
         Bukkit.getPluginManager().registerEvents(new RestrictPlayerEvent(this), this);
+
+        //Bukkit.getPluginManager().registerEvents(new MainClickEvent2(this), this);
+
         getCommand("communalaction").setExecutor(new CommunalActionCommand(this));
         for(String key : getConfig().getConfigurationSection("punishments").getKeys(false)){
             voteTypes.add(getConfig().getString("punishments."+key+".name"));

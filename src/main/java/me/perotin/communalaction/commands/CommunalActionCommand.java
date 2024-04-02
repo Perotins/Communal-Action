@@ -2,7 +2,6 @@ package me.perotin.communalaction.commands;
 
 import me.perotin.communalaction.CommunalAction;
 import me.perotin.communalaction.events.MainClickEvent;
-import me.perotin.communalaction.events.MainClickEvent2;
 import me.perotin.communalaction.files.CommunalFile;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -56,9 +55,9 @@ public class CommunalActionCommand implements CommandExecutor{
                         if (players.contains(sender.getUniqueId())) {
 
                             sender.openInventory(plugin.getMainInventory(target));
-                            MainClickEvent2.voting.put(sender.getUniqueId(), target);
-                            Bukkit.getLogger().info("Removed player from hashset!");
-                            players.remove(sender.getUniqueId());
+                            MainClickEvent.voting.put(sender.getUniqueId(), target);
+
+                           players.remove(sender.getUniqueId());
                         } else {
 
 
@@ -76,8 +75,31 @@ public class CommunalActionCommand implements CommandExecutor{
 
                         } else {
                         // offline
-                        sender.sendMessage(messages.getString("punish-online"));
-                        return true;
+                        if (Bukkit.getOfflinePlayer(target) != null ) {
+                            if (players.contains(sender.getUniqueId())) {
+
+                                sender.openInventory(plugin.getMainInventory(target));
+                                MainClickEvent.voting.put(sender.getUniqueId(), target);
+
+                                players.remove(sender.getUniqueId());
+                            } else {
+
+
+                                IntStream.range(0, 20).forEach(i -> sender.sendMessage(" "));
+
+                                sender.sendMessage(messages.getString("confirming-action")
+                                        .replace("$player$", args[0]));
+                                TextComponent confirm = new TextComponent(TextComponent.fromLegacyText(messages.getString("confirming-action-2")
+                                        .replace("$misc$", messages.getString("cancel"))));
+                                confirm.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(messages.getString("click-to-confirm")).create()));
+                                confirm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/votep " + target));
+                                sender.spigot().sendMessage(confirm);
+                                players.add(sender.getUniqueId());
+                            }
+                        } else {
+                            sender.sendMessage(messages.getString("punish-online"));
+                            return true;
+                        }
                     }
                 }
             } else {
